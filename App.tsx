@@ -1,20 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { ThemeProvider } from 'styled-components/native';
+import theme from './src/theme/theme';
+import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold, useFonts } from "@expo-google-fonts/dm-sans";
+import { ActivityIndicator } from "react-native";
+import { Routes } from './src/screens/routes';
+import { FavoritesProvider } from './src/contexts/favoritesContext';
+import { AuthContextProvider } from './src/contexts/AuthContext';
+import Toast from 'react-native-toast-message'; 
 
 export default function App() {
+  const [fontsLoaded] = useFonts({ DMSans_400Regular, DMSans_500Medium, DMSans_700Bold });
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthContextProvider>
+      <FavoritesProvider>
+        <ThemeProvider theme={theme}>
+          {fontsLoaded ? <Routes /> : <ActivityIndicator />}
+          <Toast />
+        </ThemeProvider>
+      </FavoritesProvider>
+    </AuthContextProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
