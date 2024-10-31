@@ -59,7 +59,7 @@ export function Profile() {
   
 
   useEffect(() => {
-    fetchUserProfile(); // Busca os dados do perfil ao carregar o componente
+    fetchUserProfile(); 
   }, []);
 
   async function handleUserPhotoSelect() {

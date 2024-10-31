@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "engBRASIL 24",
-    "slug": "engBRASIL 24",
+    "slug": "app-eng-brasil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
