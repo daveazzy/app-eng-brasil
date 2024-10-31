@@ -14,17 +14,53 @@ import Toast from 'react-native-toast-message';
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/app.routes";
 import { sanitizeFileName } from "../../@data-treatments/sanitizeFileName";
+import { UserDTO } from "../../dtos/UserDTO";
+import { storageUserSave } from "../../storage/storageUser";
 
 export function Profile() {
   const { user, signOut, updateUserProfile } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [userPhoto, setUserPhoto] = useState<string | undefined>(user.photoUri);
-  
-  const navigation = useNavigation<AppNavigatorRoutesProps>()
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
+
+  const [name, setName] = useState(user.name);
+  const [cpf, setCpf] = useState(user.cpf);
+  const [academicBackground, setAcademicBackground] = useState(user.academicBackground);
+  const [institution, setInstitution] = useState(user.institution);
+  const [state, setState] = useState(user.state);
 
   useEffect(() => {
     setUserPhoto(user.photoUri);
   }, [user.photoUri]);
+
+  async function fetchUserProfile() {
+    try {
+        const response = await api.get('/me');
+        if (response.data) {
+            const userData: UserDTO = response.data;
+            setUserPhoto(userData.photoUri);
+            setName(userData.name);
+            setCpf(userData.cpf);
+            setAcademicBackground(userData.academicBackground);
+            setInstitution(userData.institution);
+            setState(userData.state);
+            await storageUserSave(userData);
+        }
+    } catch (error) {
+        const customError = error as CustomError; 
+        console.error("Erro ao buscar dados do perfil:", customError.message);
+        
+        if (customError.response?.status === 401) {
+            await signOut();
+        }
+    }
+}
+  
+  
+
+  useEffect(() => {
+    fetchUserProfile(); // Busca os dados do perfil ao carregar o componente
+  }, []);
 
   async function handleUserPhotoSelect() {
     const photoSelected = await ImagePicker.launchImageLibraryAsync({
@@ -33,11 +69,11 @@ export function Profile() {
       aspect: [4, 4],
       allowsEditing: true,
     });
-  
+
     if (photoSelected.canceled) {
       return;
     }
-  
+
     const fileUri = photoSelected.assets[0].uri;
     const fileExtension = fileUri.split('.').pop();
     const fileName = sanitizeFileName(`${user.name}.${fileExtension}`);
@@ -46,19 +82,19 @@ export function Profile() {
       name: fileName,
       type: `image/${fileExtension}` as string,
     } as any;
-  
+
     const userPhotoUploadForm = new FormData();
     userPhotoUploadForm.append('photoUri', photoFile); 
-  
+
     try {
       const photoUpdatedResponse = await api.patch('/updateParticipantProfile', userPhotoUploadForm, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-  
+
       console.log("Photo updated response:", photoUpdatedResponse.data);
-  
+
       const updatedPhotoUri = photoUpdatedResponse.data.photoUri || user.photoUri;
       setUserPhoto(updatedPhotoUri);
       
@@ -84,8 +120,8 @@ export function Profile() {
     setIsModalVisible(!isModalVisible);
   };
 
-  function handleEditProfile(){
-    navigation.navigate("editProfile")
+  function handleEditProfile() {
+    navigation.navigate("editProfile");
   }
 
   return (
@@ -128,13 +164,10 @@ export function Profile() {
       <Body>
         <TitleSession>Informações de perfil e configurações</TitleSession>
 
-        <TopButton
-          onPress={handleEditProfile}
-        >
+        <TopButton onPress={handleEditProfile}>
           <ButtonContent>
             <FontAwesome name="user" size={20} color="#0961C9" style={{ marginRight: 10 }} />
-            <ButtonsText
-            >Editar perfil</ButtonsText>
+            <ButtonsText>Editar perfil</ButtonsText>
             <Feather name="chevron-right" size={20} color="#0961C9" style={{ marginLeft: 'auto' }} />
           </ButtonContent>
         </TopButton>

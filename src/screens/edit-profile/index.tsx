@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import { Container, EditPhoto, Forms, Photo, PhotoContainer, PhotoText, Title } from "./styles";
 import { Header } from "../../components/header";
 import { StatusBar, TouchableOpacity, View } from "react-native";
@@ -6,152 +6,185 @@ import { Input } from "../../components/inputs/inputs";
 import { FontAwesome } from '@expo/vector-icons';
 import { useAuth } from "../../hooks/UseAuth";
 import { api } from "../../services/api";
-import Toast from 'react-native-toast-message'; 
+import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
 import { Button } from "../../components/btn/btn";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "../routes/app.routes";
+import { sanitizeFileName } from "../../@data-treatments/sanitizeFileName";
+import { UserDTO } from "../../dtos/UserDTO";
+import { storageUserSave } from "../../storage/storageUser";
 
-
-
-export function EditProfile(){
-    const { user, signOut, updateUserProfile } = useAuth();
+export function EditProfile() {
+    const { user, updateUserProfile, signOut } = useAuth();
     const [userPhoto, setUserPhoto] = useState<string | undefined>(user.photoUri);
+    const [photoFile, setPhotoFile] = useState<any>(null);
 
-    const navigation = useNavigation<AppNavigatorRoutesProps>()
+    const [name, setName] = useState(user.name);
+    const [cpf, setCpf] = useState(user.cpf);
+    const [academicBackground, setAcademicBackground] = useState(user.academicBackground);
+    const [institution, setInstitution] = useState(user.institution);
+    const [state, setState] = useState(user.state);
 
-    function handleGoBack(){
-        navigation.goBack()
+    const navigation = useNavigation<AppNavigatorRoutesProps>();
+
+    useEffect(() => {
+        fetchUserProfile(); 
+    }, []);
+
+ 
+    async function fetchUserProfile() {
+        try {
+            const response = await api.get('/me');
+            if (response.data) {
+                const userData: UserDTO = response.data;
+                setUserPhoto(userData.photoUri);
+                setName(userData.name);
+                setCpf(userData.cpf);
+                setAcademicBackground(userData.academicBackground);
+                setInstitution(userData.institution);
+                setState(userData.state);
+                await storageUserSave(userData);
+            }
+        } catch (error) {
+            const customError = error as CustomError; 
+            console.error("Erro ao buscar dados do perfil:", customError.message);
+            
+            if (customError.response?.status === 401) {
+                await signOut();
+            }
+        }
+    }
+    
+
+    function handleGoBack() {
+        navigation.goBack(); 
     }
 
+    // Handle user photo selection
     async function handleUserPhotoSelect() {
         const photoSelected = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 1,
-          aspect: [4, 4],
-          allowsEditing: true,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+            allowsEditing: true,
         });
-      
+
         if (photoSelected.canceled) {
-          return;
+            return; 
         }
-      
+
         const fileUri = photoSelected.assets[0].uri;
         const fileExtension = fileUri.split('.').pop();
-        const fileName = `${user.name}.${fileExtension}`.toLowerCase();
-        const photoFile = {
-          uri: fileUri,
-          name: fileName,
-          type: `image/${fileExtension}` as string,
-        } as any;
-      
-        const userPhotoUploadForm = new FormData();
-        userPhotoUploadForm.append('photoUri', photoFile); 
-      
-        try {
-          const photoUpdatedResponse = await api.patch('/updateParticipantProfile', userPhotoUploadForm, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-      
-          console.log("Photo updated response:", photoUpdatedResponse.data);
-      
-          const updatedPhotoUri = photoUpdatedResponse.data.photoUri || user.photoUri;
-          setUserPhoto(updatedPhotoUri);
-          
-          updateUserProfile({ ...user, photoUri: updatedPhotoUri }); 
-    
-          Toast.show({
-            type: 'success',
-            text1: 'Foto atualizada com sucesso!',
-          });
-        } catch (error) {
-          console.error("Erro ao atualizar a foto:", error);
-          Toast.show({
-            type: 'error',
-            text1: 'Falha ao atualizar a foto!',
-          });
+        const fileName = sanitizeFileName(`${user.name}.${fileExtension}`);
+        const newPhotoFile = {
+            uri: fileUri,
+            name: fileName,
+            type: `image/${fileExtension}`,
+        };
+
+        setUserPhoto(fileUri); 
+        setPhotoFile(newPhotoFile); 
+    }
+
+    // Handle profile editing
+    async function handleEditProfile() {
+        const userProfileForm = new FormData();
+
+        userProfileForm.append('name', name);
+        userProfileForm.append('cpf', cpf);
+        userProfileForm.append('academicBackground', academicBackground);
+        userProfileForm.append('institution', institution);
+        userProfileForm.append('state', state);
+
+        if (photoFile) {
+            userProfileForm.append('photoUri', photoFile); 
         }
-      }
 
-    return(
+        try {
+            const response = await api.patch("/updateParticipantProfile", userProfileForm, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const updatedPhotoUri = response.data.photoUri || user.photoUri;
+            setUserPhoto(updatedPhotoUri); 
+
+
+            updateUserProfile({
+                ...user,
+                name,
+                cpf,
+                academicBackground,
+                institution,
+                state,
+                photoUri: updatedPhotoUri,
+            });
+
+
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Profile updated successfully',
+                position: 'top',
+            });
+            navigation.goBack(); 
+        } catch (error) {
+            console.error("Error updating profile:", error);
+
+            Toast.show({
+                type: 'error',
+                text1: 'Failed to update profile',
+                position: 'top',
+            });
+        }
+    }
+
+    return (
         <Container>
-            <StatusBar 
-                backgroundColor="transparent" 
-                translucent 
-                barStyle={"light-content"}
-            />
-            <Header
-                title="Editar perfil"
-            />
-            <Forms
-                showsVerticalScrollIndicator= {false}
-            >
-            <PhotoContainer>
-            <TouchableOpacity
-          style={{ backgroundColor: 'black', borderRadius: 100,width: 142, height: 142,justifyContent: 'center', alignItems: 'center' }} 
-          >
-          {userPhoto ? (
-            <Photo source={{ uri: userPhoto }} /> 
-          ) : (
-            <View style={{ 
-              width: 142, 
-              height: 142, 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              borderRadius: 100, 
-              backgroundColor: '#e0e0e0' 
-            }}>
-              <FontAwesome name="user" size={64} color="#0961C9" /> 
-            </View>
-          )}
-        </TouchableOpacity>
-        <EditPhoto
-            onPress={handleUserPhotoSelect}
-        >
-            <PhotoText>Alterar foto</PhotoText>
-        </EditPhoto>
-            </PhotoContainer>
+            <StatusBar backgroundColor="transparent" translucent barStyle={"light-content"} />
+            <Header title="Edit Profile" />
+            <Forms showsVerticalScrollIndicator={false}>
+                <PhotoContainer>
+                    <TouchableOpacity onPress={handleUserPhotoSelect} style={{ backgroundColor: 'black', borderRadius: 100, width: 142, height: 142, justifyContent: 'center', alignItems: 'center' }}>
+                        {userPhoto ? (
+                            <Photo source={{ uri: userPhoto }} />
+                        ) : (
+                            <View style={{
+                                width: 142,
+                                height: 142,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 100,
+                                backgroundColor: '#e0e0e0'
+                            }}>
+                                <FontAwesome name="user" size={64} color="#0961C9" />
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                    <EditPhoto onPress={handleUserPhotoSelect}>
+                        <PhotoText>Change Photo</PhotoText>
+                    </EditPhoto>
+                </PhotoContainer>
 
-                <Title style={{ marginTop: 24 }}>Nome</Title>
-                <Input
-                    placeholder= {user.name}
-                />
+                <Title style={{ marginTop: 24 }}>Name</Title>
+                <Input value={name} onChangeText={setName} />
+
                 <Title style={{ marginTop: 24 }}>CPF</Title>
-                <Input
-                    placeholder= {user.cpf}
-                />
-                <Title style={{ marginTop: 24 }}>Formação acadêmica</Title>
-                <Input
-                    placeholder= {user.academicBackground}
-                />
-                <Title style={{ marginTop: 24 }}>Instituição</Title>
-                <Input
-                    placeholder= {user.institution}
-                />
-                <Title style={{ marginTop: 24 }}>Estado</Title>
-                <Input
-                    placeholder= {user.state}
-                />
+                <Input value={cpf} onChangeText={setCpf} />
 
-                <Button
-                    title="Salvar alterações"
-                    style={{
-                        marginTop: 48,
-                    }}
-                />
-                <Button
-                    title="Cancelar"
-                    type="SECONDARY"
-                    style={{
-                        marginTop: 16,
-                        marginBottom: 24
-                    }}
-                    onPress={handleGoBack}
-                />
+                <Title style={{ marginTop: 24 }}>Academic Background</Title>
+                <Input value={academicBackground} onChangeText={setAcademicBackground} />
 
+                <Title style={{ marginTop: 24 }}>Institution</Title>
+                <Input value={institution} onChangeText={setInstitution} />
+
+                <Title style={{ marginTop: 24 }}>State</Title>
+                <Input value={state} onChangeText={setState} />
+
+                <Button title="Save Changes" style={{ marginTop: 48 }} onPress={handleEditProfile} />
+                <Button title="Cancel" type="SECONDARY" style={{ marginTop: 16, marginBottom: 24 }} onPress={handleGoBack} />
             </Forms>
         </Container>
-    )
+    );
 }

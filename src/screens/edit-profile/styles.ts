@@ -11,7 +11,7 @@ export const Forms = styled.ScrollView`
 `
 export const Title = styled.Text`
     font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};
-    font-size: ${({ theme }) => theme.FONT_SIZE.LG}px;
+    font-size: ${({ theme }) => theme.FONT_SIZE.MD}px;
     margin: 0 0 12px 0;
 `
 export const PhotoContainer = styled.View`

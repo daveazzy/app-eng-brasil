@@ -3,12 +3,14 @@ import { UserDTO } from "../dtos/UserDTO";
 import { api } from "../services/api";
 import { storageUserSave, storageUserGet, storageUserRemove } from "../storage/storageUser";
 import { storageAuthTokenSave, storageAuthTokenGet, storageAuthTokenRemove } from "../storage/storageAuthToken";
+import { AppError } from "../utils/AppError";
 
 export type AuthContextDataProps = {
     user: UserDTO;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => Promise<void>;
-    updateUserProfile: (updatedUser: UserDTO) => void; 
+    updateUserProfile: (updatedUser: UserDTO) => Promise<void>;
+    fetchUserProfile: () => Promise<void>; 
     isLoadingUserStorageData: boolean;
 }
 
@@ -80,6 +82,30 @@ export function AuthContextProvider ({ children }: AuthContextProviderProps) {
         }
     }
 
+    interface CustomError extends Error {
+        response?: {
+            status?: number;
+        };
+    }
+
+    async function fetchUserProfile() {
+        try {
+            const response = await api.get('/me');
+            if (response.data) {
+                const userData: UserDTO = response.data;
+                setUser(userData);
+                await storageUserSave(userData);
+            }
+        } catch (error) {
+            const customError = error as CustomError; 
+            console.error("Erro ao buscar dados do perfil:", customError.message);
+            
+            if (customError.response?.status === 401) {
+                await signOut();
+            }
+        }
+    }
+
     async function updateUserProfile(updatedUser: UserDTO) {
         try {
             setUser(updatedUser); 
@@ -99,6 +125,7 @@ export function AuthContextProvider ({ children }: AuthContextProviderProps) {
             signIn,
             signOut,
             updateUserProfile, 
+            fetchUserProfile,
             isLoadingUserStorageData
         }}>
             {children}
