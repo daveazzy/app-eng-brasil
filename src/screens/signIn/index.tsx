@@ -1,16 +1,6 @@
 import React, { useState } from "react";
-import { StatusBar, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import {
-  Container,
-  Logo_eng_brasil,
-  Container_img,
-  Input_Title,
-  Forms,
-  PassRecoveryBox,
-  PassRecoveryText,
-  InputBox,
-  ButtonBox,
-} from "./styles";
+import { StatusBar, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
+import { Container, Logo_eng_brasil, Container_img, Input_Title, Forms, PassRecoveryBox, PassRecoveryText, InputBox, ButtonBox } from "./styles";
 import logo_engbrasil from "../../assets/logo_engbrasil.png";
 import { Button } from "../../components/btn/btn";
 import { Input } from "../../components/inputs/inputs";
@@ -21,6 +11,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAuth } from "../../hooks/UseAuth";
 import { AppError } from "../../utils/AppError";
+import { FontAwesome } from "@expo/vector-icons"; // Importando FontAwesome do Expo
 
 type FormDataProps = {
   email: string;
@@ -34,11 +25,11 @@ const signInSchema = yup.object({
 
 export function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn } = useAuth();
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signInSchema),
   });
-
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   async function handleSignIn({ email, password }: FormDataProps) {
@@ -50,12 +41,11 @@ export function SignIn() {
       const title = isAppError
         ? error.message
         : "Não foi possível realizar o login. Tente novamente mais tarde.";
-      alert(title);
 
-      setIsLoading(false)
+      alert(title);
+      setIsLoading(false);
     }
   }
-  
 
   function handleNewAccount() {
     navigation.navigate("register");
@@ -63,11 +53,11 @@ export function SignIn() {
 
   return (
     <Container>
-      <StatusBar 
-      backgroundColor="transparent" 
-      translucent 
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={"dark-content"}
       />
-
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -77,7 +67,6 @@ export function SignIn() {
           <Container_img>
             <Logo_eng_brasil source={logo_engbrasil} resizeMode="contain" />
           </Container_img>
-
           <Forms>
             <InputBox>
               <Input_Title>Email</Input_Title>
@@ -91,34 +80,42 @@ export function SignIn() {
                     onChangeText={onChange}
                     value={value}
                     errorMessage={errors.email?.message}
-                    style={{ marginBottom: 24 }}
                   />
                 )}
               />
-
-              <Input_Title>Senha</Input_Title>
+              <Input_Title
+                style={{
+                  marginTop: 24
+                }}
+              >Senha</Input_Title>
               <Controller
                 control={control}
                 name="password"
                 render={({ field: { onChange, value } }) => (
                   <Input
                     placeholder="********"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     autoCapitalize="none"
                     onChangeText={onChange}
                     value={value}
                     errorMessage={errors.password?.message}
-                    style={{ marginBottom: 24 }}
                     onSubmitEditing={handleSubmit(handleSignIn)}
+                    rightIcon={
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <FontAwesome
+                          name={showPassword ? "eye" : "eye-slash"}
+                          size={20}
+                          color="grey"
+                        />
+                      </TouchableOpacity>
+                    }
                   />
                 )}
               />
-
               <PassRecoveryBox>
-                <PassRecoveryText>Recuperar senha</PassRecoveryText>
+                <PassRecoveryText style={{marginTop: 24}}>Recuperar senha</PassRecoveryText>
               </PassRecoveryBox>
             </InputBox>
-
             <ButtonBox>
               <Button title="Entrar" onPress={handleSubmit(handleSignIn)} style={{ marginBottom: 16 }} />
               <Button title="Cadastrar-se" type="SECONDARY" onPress={handleNewAccount} style={{ marginBottom: 24 }} />

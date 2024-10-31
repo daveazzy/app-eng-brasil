@@ -8,7 +8,7 @@ export const Container = styled(SafeAreaView)`
 `;
 
 export const ProfileContainer = styled.View`
-    flex: 0.25;
+    flex: 0.30;
     align-items: center;
     padding: 16px 16px 0 16px;
     flex-direction: row;
@@ -24,7 +24,7 @@ export const Photo = styled.Image.attrs(()=> ({
 export const Info = styled.View`
   flex: 1;
   margin: 0 10px 0 10px;
-  height: 40%;
+  height:55%;
 `
   export const Name = styled.Text`
     font-family: ${({ theme }) => theme.FONT_FAMILY.MEDIUM};

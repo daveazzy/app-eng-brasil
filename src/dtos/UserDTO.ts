@@ -5,4 +5,7 @@ export type UserDTO = {
     qrCodeToken: string;
     academicBackground: string;
     photoUri: string;
+    cpf: string;
+    institution: string;
+    state: string;
 }

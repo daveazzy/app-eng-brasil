@@ -11,11 +11,16 @@ import { StatusBar, TouchableOpacity, View } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { api } from "../../services/api";
 import Toast from 'react-native-toast-message'; 
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "../routes/app.routes";
+import { sanitizeFileName } from "../../@data-treatments/sanitizeFileName";
 
 export function Profile() {
   const { user, signOut, updateUserProfile } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [userPhoto, setUserPhoto] = useState<string | undefined>(user.photoUri); 
+  const [userPhoto, setUserPhoto] = useState<string | undefined>(user.photoUri);
+  
+  const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   useEffect(() => {
     setUserPhoto(user.photoUri);
@@ -35,7 +40,7 @@ export function Profile() {
   
     const fileUri = photoSelected.assets[0].uri;
     const fileExtension = fileUri.split('.').pop();
-    const fileName = `${user.name}.${fileExtension}`.toLowerCase();
+    const fileName = sanitizeFileName(`${user.name}.${fileExtension}`);
     const photoFile = {
       uri: fileUri,
       name: fileName,
@@ -79,6 +84,10 @@ export function Profile() {
     setIsModalVisible(!isModalVisible);
   };
 
+  function handleEditProfile(){
+    navigation.navigate("editProfile")
+  }
+
   return (
     <Container>
       <StatusBar 
@@ -119,10 +128,13 @@ export function Profile() {
       <Body>
         <TitleSession>Informações de perfil e configurações</TitleSession>
 
-        <TopButton>
+        <TopButton
+          onPress={handleEditProfile}
+        >
           <ButtonContent>
             <FontAwesome name="user" size={20} color="#0961C9" style={{ marginRight: 10 }} />
-            <ButtonsText>Editar perfil</ButtonsText>
+            <ButtonsText
+            >Editar perfil</ButtonsText>
             <Feather name="chevron-right" size={20} color="#0961C9" style={{ marginLeft: 'auto' }} />
           </ButtonContent>
         </TopButton>

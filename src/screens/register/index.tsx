@@ -65,30 +65,28 @@ export function Register() {
               placeholder="Seu nome"
               value={name}
               onChangeText={setName}
-              style={{ marginBottom: 24, marginHorizontal: 16 }}
             />
-            <Title>Email</Title>
+            <Title
+              style={{marginTop: 24}}
+            >Email</Title>
             <Input
               placeholder="example@example.com"
               value={email}
               onChangeText={setEmail}
-              style={{ marginBottom: 24, marginHorizontal: 16 }}
             />
-            <Title>Senha</Title>
+            <Title style={{marginTop: 24}}>Senha</Title>
             <Input
               placeholder="********"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
-              style={{ marginBottom: 24, marginHorizontal: 16 }}
             />
-            <Title>Repetir senha</Title>
+            <Title style={{marginTop: 24}}>Repetir senha</Title>
             <Input
               placeholder="********"
               secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              style={{ marginBottom: 24, marginHorizontal: 16 }}
             />
           </Forms>
           <ButtonsBox>

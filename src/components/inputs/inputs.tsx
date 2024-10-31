@@ -1,19 +1,26 @@
+import { ReactNode } from "react";
 import { TextInputProps } from "react-native";
-
-import { Container, ErrorMessageText, InputBG } from "./styles";
+import { Container, ErrorMessageText, InputBG, RightIconContainer } from "./styles";
 
 type Props = TextInputProps & {
-    errorMessage?: string | null
-}
+  errorMessage?: string | null;
+  rightIcon?: ReactNode;
+};
 
-export function Input({errorMessage = null,...rest}: Props){
-    const isInvalid = !!errorMessage
-    return(
-        <InputBG>
-            <Container
-            {...rest}
-            />
-            {errorMessage && <ErrorMessageText>{errorMessage}</ErrorMessageText>}
-        </InputBG>
-    )
+export function Input({ errorMessage = null, rightIcon = null, ...rest }: Props) {
+  const isInvalid = !!errorMessage;
+
+  return (
+    <InputBG>
+      <Container
+        {...rest}
+      />
+      {rightIcon && (
+        <RightIconContainer>
+          {rightIcon}
+        </RightIconContainer>
+      )}
+      {errorMessage && <ErrorMessageText>{errorMessage}</ErrorMessageText>}
+    </InputBG>
+  );
 }
