@@ -121,14 +121,14 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 8,
-        color: '#0961C9',
+        color: '#011B60',
         textAlign: "center",
     },
     nameInstitutionContainer: {
         flexDirection: 'row',
-        justifyContent: 'center', // Center-aligns the content
-        alignItems: 'center', // Vertically align items
-        flexWrap: 'wrap', // Allows wrapping to the next line
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
         marginBottom: 16,
     },
     name: {
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: '#0961C9',
         textAlign: "center",
-        marginRight: 8, // Adds some space between name and institution
+        marginRight: 8, 
     },
     institution: {
         fontSize: 16,

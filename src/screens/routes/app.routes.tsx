@@ -6,12 +6,14 @@ import { Profile } from '../profile';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { EditProfile } from '../edit-profile';
+import { Configurations } from '../configurations-screen';
 
 type AppRoutes = {
     home: undefined;
     favorites: undefined;
     profile: undefined;
     editProfile: undefined;
+    configurations: undefined;
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>;
@@ -70,6 +72,11 @@ export function AppRoutes() {
             <Screen
                 name='editProfile'
                 component={EditProfile}
+                options={{ tabBarButton: () => null}}
+            />
+            <Screen
+                name='configurations'
+                component={Configurations}
                 options={{ tabBarButton: () => null}}
             />
 

@@ -124,6 +124,10 @@ export function Profile() {
     navigation.navigate("editProfile");
   }
 
+  function handleConfig(){
+    navigation.navigate("configurations")
+  }
+
   return (
     <Container>
       <StatusBar 
@@ -180,7 +184,7 @@ export function Profile() {
           </ButtonContent>
         </MiddleButton>
 
-        <BottomButton>
+        <BottomButton onPress={handleConfig}>
           <ButtonContent>
             <FontAwesome name="cog" size={20} color="#0961C9" style={{ marginRight: 10 }} />
             <ButtonsText>Outras configurações</ButtonsText>

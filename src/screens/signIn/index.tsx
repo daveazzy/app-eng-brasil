@@ -51,6 +51,9 @@ export function SignIn() {
     navigation.navigate("register");
   }
 
+  function handlePassRecovery(){
+    navigation.navigate('passRecovery')
+  }
   return (
     <Container>
       <StatusBar
@@ -113,7 +116,7 @@ export function SignIn() {
                 )}
               />
               <PassRecoveryBox>
-                <PassRecoveryText style={{marginTop: 24}}>Recuperar senha</PassRecoveryText>
+                <PassRecoveryText style={{marginTop: 24}} onPress={handlePassRecovery}>Recuperar senha</PassRecoveryText>
               </PassRecoveryBox>
             </InputBox>
             <ButtonBox>
