@@ -39,7 +39,7 @@ export function Home() {
     const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
     const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null); // Para armazenar o palestrante selecionado
+    const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
 
     useEffect(() => {
         const fetchSpeakers = async () => {
@@ -55,9 +55,9 @@ export function Home() {
         fetchSpeakers();
     }, []);
 
-    const carouselData = getUniqueTitle(speakers).map((title, index) => ({
+    const carouselData = getUniqueCategories(speakers).map((category, index) => ({
         id: (index + 1).toString(),
-        title: title
+        title: category
     }));
 
     const filterSpeakers = useCallback(() => {
@@ -107,13 +107,13 @@ export function Home() {
                 <GreyBar />
             </Header>
             <Body showsVerticalScrollIndicator={false}>
-                <Carousel data={carouselData} onItemPress={handleCarouselPress} />
+                <Carousel data={carouselData} onItemPress={handleCarouselPress} selectedCategory={selectedCategory} />
                 <Palestra>PALESTRAS</Palestra>
                 {filteredSpeakers.map(speaker => (
                     <SpeakerCard 
                         key={speaker.id} 
                         speaker={speaker} 
-                        onPress={() => handleCardPress(speaker)} // Passando a função para abrir o modal
+                        onPress={() => handleCardPress(speaker)}
                     />
                 ))}
             </Body>

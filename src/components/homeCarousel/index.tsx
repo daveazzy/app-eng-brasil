@@ -5,6 +5,7 @@ import { CarouselContainer, CarouselItem, Title } from './styles';
 interface CarouselProps {
   data: Array<{ id: string; title: string }>;
   onItemPress: (item: { id: string; title: string }) => void;
+  selectedCategory: string;
 }
 
 export function Carousel({ data, onItemPress }: CarouselProps) {
