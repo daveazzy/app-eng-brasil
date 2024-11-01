@@ -3,45 +3,76 @@ import { Body, Container, GreyBar, Header, Palestra } from "./styles";
 import { SearchBar } from "../../components/searchBar";
 import { Carousel } from "../../components/homeCarousel";
 import SpeakerCard from "../../components/boxSpeakers";
-import { speakers, Speaker } from "../../@event/event";
 import { StatusBar } from "react-native";
+import { api } from "../../services/api";
+
+interface Speaker {
+    id: number;
+    name: string;
+    institution: string;
+    photoUri: string;
+    presentationTitle: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    congressId: string;
+    administratorId: string;
+    categoryId: string;
+    categoryName?: string;
+}
 
 function regexText(text: string): string {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
-function getUniqueTitle(speakers: Speaker[]): string[] {
-    const titles = speakers.map(speaker => speaker.title);
-    return ["Todos", ...new Set(titles)];
+function getUniqueCategories(speakers: Speaker[]): string[] {
+    const categories = speakers.map(speaker => speaker.categoryName || "Sem Categoria").filter(Boolean);
+    return ["Todos", ...new Set(categories)];
 }
 
 export function Home() {
+    const [speakers, setSpeakers] = useState<Speaker[]>([]);
     const [searchText, setSearchText] = useState<string>('');
-    const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
+    const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
 
-    const carouselData = getUniqueTitle(speakers).map((title, index) => ({
+    useEffect(() => {
+        const fetchSpeakers = async () => {
+            try {
+                const response = await api.get('/speakers/123');
+                const data = await response.data;
+                setSpeakers(data);
+                setFilteredSpeakers(data);
+            } catch (error) {
+                console.error("Erro ao buscar palestrantes:", error);
+            }
+        };
+        fetchSpeakers();
+    }, []);
+
+    const carouselData = getUniqueCategories(speakers).map((category, index) => ({
         id: (index + 1).toString(),
-        title: title
+        title: category
     }));
 
     const filterSpeakers = useCallback(() => {
-        var filtered = speakers;
+        let filtered = speakers;
 
         if (selectedCategory !== 'Todos') {
-            filtered = filtered.filter(speaker => speaker.title === selectedCategory);
+            filtered = filtered.filter(speaker => speaker.categoryName === selectedCategory);
         }
 
         if (searchText !== '') {
             const regexSearchText = regexText(searchText);
             filtered = filtered.filter(speaker =>
-                speaker.sessions.some(session =>
-                    regexText(session.title).includes(regexSearchText))
+                regexText(speaker.presentationTitle).includes(regexSearchText) ||
+                regexText(speaker.name).includes(regexSearchText)
             );
         }
 
         setFilteredSpeakers(filtered);
-    }, [searchText, selectedCategory]);
+    }, [speakers, searchText, selectedCategory]);
 
     useEffect(() => {
         filterSpeakers();
@@ -53,12 +84,11 @@ export function Home() {
 
     return (
         <Container>
-                <StatusBar 
+            <StatusBar 
                 backgroundColor="transparent" 
                 translucent 
                 barStyle={"dark-content"}
-                
-                />
+            />
             <Header>
                 <SearchBar
                     value={searchText}
@@ -68,15 +98,11 @@ export function Home() {
                 <GreyBar />
             </Header>
             <Body showsVerticalScrollIndicator={false}>
-
                 <Carousel data={carouselData} onItemPress={handleCarouselPress} />
-
                 <Palestra>PALESTRAS</Palestra>
-
                 {filteredSpeakers.map(speaker => (
                     <SpeakerCard key={speaker.id} speaker={speaker} />
                 ))}
-
             </Body>
         </Container>
     );

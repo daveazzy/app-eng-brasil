@@ -47,8 +47,8 @@ export const Body = styled.View`
 `;
 
 export const SpeakerImage = styled.Image`
-  width: 72px;
-  height: 72px;
+  width: 82px;
+  height: 82px;
   border-radius: 16px;
   margin-right: 10px;
   margin-left: 16px;
