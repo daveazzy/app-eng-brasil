@@ -5,13 +5,18 @@ import { useNavigation } from '@react-navigation/native';
 
 type Props = {
     title: string;
+    onBackPress?: () => void;
 }
 
-export function Header({ title }: Props) {
+export function Header({ title, onBackPress }: Props) {
     const navigation = useNavigation();
 
     function handleGoBack() {
-        navigation.goBack();
+        if (onBackPress) {
+            onBackPress();
+        } else {
+            navigation.goBack();
+        }
     }
 
     return (
