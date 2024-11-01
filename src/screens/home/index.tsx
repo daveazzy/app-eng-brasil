@@ -5,8 +5,10 @@ import { Carousel } from "../../components/homeCarousel";
 import SpeakerCard from "../../components/boxSpeakers";
 import { StatusBar } from "react-native";
 import { api } from "../../services/api";
+import SpeakerModal from "../../components/speakerModal";
+import { getUniqueTitle } from "../../utils/getUniqueTitles";
 
-interface Speaker {
+export interface Speaker {
     id: number;
     name: string;
     institution: string;
@@ -36,6 +38,8 @@ export function Home() {
     const [searchText, setSearchText] = useState<string>('');
     const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null); // Para armazenar o palestrante selecionado
 
     useEffect(() => {
         const fetchSpeakers = async () => {
@@ -51,9 +55,9 @@ export function Home() {
         fetchSpeakers();
     }, []);
 
-    const carouselData = getUniqueCategories(speakers).map((category, index) => ({
+    const carouselData = getUniqueTitle(speakers).map((title, index) => ({
         id: (index + 1).toString(),
-        title: category
+        title: title
     }));
 
     const filterSpeakers = useCallback(() => {
@@ -82,6 +86,11 @@ export function Home() {
         setSelectedCategory(item.title);
     }, []);
 
+    const handleCardPress = (speaker: Speaker) => {
+        setSelectedSpeaker(speaker);
+        setModalVisible(true);
+    };
+
     return (
         <Container>
             <StatusBar 
@@ -101,9 +110,18 @@ export function Home() {
                 <Carousel data={carouselData} onItemPress={handleCarouselPress} />
                 <Palestra>PALESTRAS</Palestra>
                 {filteredSpeakers.map(speaker => (
-                    <SpeakerCard key={speaker.id} speaker={speaker} />
+                    <SpeakerCard 
+                        key={speaker.id} 
+                        speaker={speaker} 
+                        onPress={() => handleCardPress(speaker)} // Passando a função para abrir o modal
+                    />
                 ))}
             </Body>
+            <SpeakerModal 
+                visible={modalVisible} 
+                onClose={() => setModalVisible(false)} 
+                speaker={selectedSpeaker} 
+            />
         </Container>
     );
 }
