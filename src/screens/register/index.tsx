@@ -17,12 +17,15 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   function handleGoBack() {
     navigation.goBack();
   }
 
   async function handleSignUp() {
+
+    setIsLoading(true)
     if (password !== confirmPassword) {
       Alert.alert("Erro", "As senhas não coincidem.");
       return;
@@ -39,13 +42,15 @@ export function Register() {
         type: "success",
         text1: "Sucesso!",
         text2:"Usuário cadastrado com sucesso!",
-        position: "bottom"
+        position: "top"
       });
       navigation.navigate("signIn");
 
     } catch (error) {
       console.error(error);
       Alert.alert("Erro", "Falha ao registrar. Tente novamente.");
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -94,6 +99,7 @@ export function Register() {
               title="Finalizar cadastro"
               style={{ marginBottom: 16, marginHorizontal: 16 }}
               onPress={handleSignUp}
+              isLoading={isLoading}
             />
             <Button
               title="Voltar"

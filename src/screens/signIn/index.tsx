@@ -11,7 +11,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAuth } from "../../hooks/UseAuth";
 import { AppError } from "../../utils/AppError";
-import { FontAwesome } from "@expo/vector-icons"; // Importando FontAwesome do Expo
+import { FontAwesome } from "@expo/vector-icons";
 
 type FormDataProps = {
   email: string;
@@ -43,6 +43,7 @@ export function SignIn() {
         : "Não foi possível realizar o login. Tente novamente mais tarde.";
 
       alert(title);
+    } finally {
       setIsLoading(false);
     }
   }
@@ -51,9 +52,10 @@ export function SignIn() {
     navigation.navigate("register");
   }
 
-  function handlePassRecovery(){
-    navigation.navigate('passRecovery')
+  function handlePassRecovery() {
+    navigation.navigate('passRecovery');
   }
+
   return (
     <Container>
       <StatusBar
@@ -116,12 +118,24 @@ export function SignIn() {
                 )}
               />
               <PassRecoveryBox>
-                <PassRecoveryText style={{marginTop: 24}} onPress={handlePassRecovery}>Recuperar senha</PassRecoveryText>
+                <PassRecoveryText style={{ marginTop: 24 }} onPress={handlePassRecovery}>
+                  Recuperar senha
+                </PassRecoveryText>
               </PassRecoveryBox>
             </InputBox>
             <ButtonBox>
-              <Button title="Entrar" onPress={handleSubmit(handleSignIn)} style={{ marginBottom: 16 }} />
-              <Button title="Cadastrar-se" type="SECONDARY" onPress={handleNewAccount} style={{ marginBottom: 24 }} />
+              <Button
+                title="Entrar"
+                onPress={handleSubmit(handleSignIn)}
+                isLoading={isLoading}
+                style={{ marginBottom: 16 }}
+              />
+              <Button
+                title="Cadastrar-se"
+                type="SECONDARY"
+                onPress={handleNewAccount}
+                style={{ marginBottom: 24 }}
+              />
             </ButtonBox>
           </Forms>
         </ScrollView>

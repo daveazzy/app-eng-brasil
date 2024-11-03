@@ -3,10 +3,11 @@ import { Body, Container, GreyBar, Header, Palestra } from "./styles";
 import { SearchBar } from "../../components/searchBar";
 import { Carousel } from "../../components/homeCarousel";
 import SpeakerCard from "../../components/boxSpeakers";
-import { StatusBar } from "react-native";
+import { StatusBar, View } from "react-native";
 import { api } from "../../services/api";
 import SpeakerModal from "../../components/speakerModal";
 import { getUniqueTitle } from "../../utils/getUniqueTitles";
+import LoadingIndicator from "../../components/loading";
 
 export interface Speaker {
     id: number;
@@ -40,16 +41,20 @@ export function Home() {
     const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchSpeakers = async () => {
             try {
-                const response = await api.get('/speakers/123');
+                setIsLoading(true);
+                const response = await api.get('/speakers/b213202f-bb2d-4b7a-bd6d-e7459694eba0');
                 const data = await response.data;
                 setSpeakers(data);
                 setFilteredSpeakers(data);
             } catch (error) {
                 console.error("Erro ao buscar palestrantes:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchSpeakers();
@@ -75,6 +80,17 @@ export function Home() {
             );
         }
 
+        filtered.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date); 
+            if (dateA.getTime() === dateB.getTime()) {
+                const timeA = new Date(`1970-01-01T${a.startTime}`);
+                const timeB = new Date(`1970-01-01T${b.startTime}`);
+                return timeA.getTime() - timeB.getTime();
+            }
+            return dateA.getTime() - dateB.getTime();
+        });
+
         setFilteredSpeakers(filtered);
     }, [speakers, searchText, selectedCategory]);
 
@@ -98,30 +114,38 @@ export function Home() {
                 translucent 
                 barStyle={"dark-content"}
             />
-            <Header>
-                <SearchBar
-                    value={searchText}
-                    onChangeText={setSearchText}
-                    style={{ margin: 16 }}
-                />
-                <GreyBar />
-            </Header>
-            <Body showsVerticalScrollIndicator={false}>
-                <Carousel data={carouselData} onItemPress={handleCarouselPress} selectedCategory={selectedCategory} />
-                <Palestra>PALESTRAS</Palestra>
-                {filteredSpeakers.map(speaker => (
-                    <SpeakerCard 
-                        key={speaker.id} 
-                        speaker={speaker} 
-                        onPress={() => handleCardPress(speaker)}
+            {isLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <LoadingIndicator />
+                </View>
+            ) : (
+                <>
+                    <Header>
+                        <SearchBar
+                            value={searchText}
+                            onChangeText={setSearchText}
+                            style={{ margin: 16 }}
+                        />
+                        <GreyBar />
+                    </Header>
+                    <Body showsVerticalScrollIndicator={false}>
+                        <Carousel data={carouselData} onItemPress={handleCarouselPress} selectedCategory={selectedCategory} />
+                        <Palestra>PALESTRAS</Palestra>
+                        {filteredSpeakers.map(speaker => (
+                            <SpeakerCard 
+                                key={speaker.id} 
+                                speaker={speaker} 
+                                onPress={() => handleCardPress(speaker)}
+                            />
+                        ))}
+                    </Body>
+                    <SpeakerModal 
+                        visible={modalVisible} 
+                        onClose={() => setModalVisible(false)} 
+                        speaker={selectedSpeaker} 
                     />
-                ))}
-            </Body>
-            <SpeakerModal 
-                visible={modalVisible} 
-                onClose={() => setModalVisible(false)} 
-                speaker={selectedSpeaker} 
-            />
+                </>
+            )}
         </Container>
     );
 }

@@ -14,6 +14,7 @@ import { AppNavigatorRoutesProps } from "../routes/app.routes";
 import { sanitizeFileName } from "../../@data-treatments/sanitizeFileName";
 import { UserDTO } from "../../dtos/UserDTO";
 import { storageUserSave } from "../../storage/storageUser";
+import LoadingIndicator from "../../components/loading";
 
 export function EditProfile() {
     const { user, updateUserProfile, signOut } = useAuth();
@@ -143,7 +144,7 @@ export function EditProfile() {
     return (
         <Container>
             <StatusBar backgroundColor="transparent" translucent barStyle={"light-content"} />
-            <Header title="Edit Profile" onBackPress={handleGoBack}/>
+            <Header title="Editar Perfil" onBackPress={handleGoBack}/>
             <Forms showsVerticalScrollIndicator={false}>
                 <PhotoContainer>
                     <TouchableOpacity onPress={handleUserPhotoSelect} style={{ backgroundColor: 'black', borderRadius: 100, width: 142, height: 142, justifyContent: 'center', alignItems: 'center' }}>
@@ -163,24 +164,24 @@ export function EditProfile() {
                         )}
                     </TouchableOpacity>
                     <EditPhoto onPress={handleUserPhotoSelect}>
-                        <PhotoText>Change Photo</PhotoText>
+                        <PhotoText>Alterar foto</PhotoText>
                     </EditPhoto>
                 </PhotoContainer>
 
-                <Title style={{ marginTop: 24 }}>Name</Title>
-                <Input value={name} onChangeText={setName} placeholder="Enter your name" />
+                <Title style={{ marginTop: 24 }}>Nome</Title>
+                <Input value={name} onChangeText={setName} placeholder="Insira seu nome" />
 
                 <Title style={{ marginTop: 24 }}>CPF</Title>
-                <Input value={cpf} onChangeText={setCpf} placeholder="Enter your CPF" />
+                <Input value={cpf} onChangeText={setCpf} placeholder="Insira seu CPF" />
 
-                <Title style={{ marginTop: 24 }}>Academic Background</Title>
-                <Input value={academicBackground} onChangeText={setAcademicBackground} placeholder="Enter your academic background" />
+                <Title style={{ marginTop: 24 }}>Formação acadêmica</Title>
+                <Input value={academicBackground} onChangeText={setAcademicBackground} placeholder="Insira sua formação acadêmica" />
 
-                <Title style={{ marginTop: 24 }}>Institution</Title>
-                <Input value={institution} onChangeText={setInstitution} placeholder="Enter your institution" />
+                <Title style={{ marginTop: 24 }}>Instituição</Title>
+                <Input value={institution} onChangeText={setInstitution} placeholder="Insira sua instituição" />
 
-                <Title style={{ marginTop: 24 }}>State</Title>
-                <Input value={state} onChangeText={setState} placeholder="Enter your state" />
+                <Title style={{ marginTop: 24 }}>Estado</Title>
+                <Input value={state} onChangeText={setState} placeholder="Insira o seu estado" />
 
                 <Button title="Salvar alterações" style={{ marginTop: 48 }} onPress={handleEditProfile} />
                 <Button title="Cancelar" type="SECONDARY" style={{ marginTop: 16, marginBottom: 24 }} onPress={handleGoBack} />
@@ -188,9 +189,3 @@ export function EditProfile() {
         </Container>
     );
 }
-
-const LoadingIndicator = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
-    </View>
-);
